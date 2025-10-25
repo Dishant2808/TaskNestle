@@ -80,19 +80,35 @@
 1. **Build Command Error:**
    - ✅ Fixed: Added `"build": "echo 'No build step required for this Node.js backend'"` to package.json
 
-2. **MongoDB Connection Issues:**
+2. **Port Binding Error (Render.com):**
+   - ✅ Fixed: Updated server to bind to `0.0.0.0` instead of `localhost`
+   - ✅ Fixed: Added proper error handling for port conflicts
+   - ✅ Fixed: Added `rootDir: backend` to render.yaml
+   - The server now properly binds to all interfaces on the PORT environment variable
+
+3. **MongoDB Connection Issues:**
    - Ensure MongoDB URI is correct
    - Check if MongoDB Atlas allows connections from Render's IPs
    - Verify database name and credentials
 
-3. **CORS Issues:**
+4. **CORS Issues:**
+   - ✅ Fixed: Added Vercel domain support to CORS configuration
+   - ✅ Fixed: Added dynamic Vercel subdomain support
    - Update `FRONTEND_URL` environment variable with your actual frontend URL
    - Check CORS configuration in `server.js`
 
-4. **Email Service Issues:**
+5. **Email Service Issues:**
    - Use Gmail App Password (not regular password)
    - Enable 2-factor authentication on Gmail
    - Update `EMAIL_USER` and `EMAIL_PASS` with correct credentials
+
+#### Testing Server Configuration:
+If you're still having port binding issues, you can test with the simple test server:
+```bash
+cd backend
+node test-server.js
+```
+This will help verify that the port binding configuration is working correctly.
 
 ### Environment Variables Reference
 

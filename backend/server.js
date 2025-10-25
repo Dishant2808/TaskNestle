@@ -38,12 +38,21 @@ const corsOptions = {
       process.env.FRONTEND_URL || 'http://localhost:3000',
       'http://localhost:3000',
       'http://127.0.0.1:3000',
-      'http://localhost:3001'
+      'http://localhost:3001',
+      'https://tasknestle.vercel.app',
+      'https://tasknestle-git-main.vercel.app',
+      'https://tasknestle-git-develop.vercel.app'
     ];
+    
+    // Allow any Vercel subdomain for development
+    if (origin && origin.includes('.vercel.app')) {
+      return callback(null, true);
+    }
     
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
+      console.log('CORS blocked origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -56,7 +65,23 @@ app.use(cors(corsOptions));
 
 // Manual CORS headers for additional safety
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:3000');
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://tasknestle.vercel.app',
+    'https://tasknestle-git-main.vercel.app',
+    'https://tasknestle-git-develop.vercel.app'
+  ];
+  
+  const origin = req.headers.origin;
+  
+  // Allow Vercel domains dynamically
+  if (origin && (allowedOrigins.includes(origin) || origin.includes('.vercel.app'))) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
+  }
+  
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');

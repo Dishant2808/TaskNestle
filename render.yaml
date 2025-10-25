@@ -5,6 +5,7 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: npm start
+    rootDir: backend
     envVars:
       - key: NODE_ENV
         value: production
@@ -23,7 +24,7 @@ services:
       - key: EMAIL_PASS
         value: your-app-password
       - key: FRONTEND_URL
-        value: https://your-frontend-url.onrender.com
+        value: https://tasknestle.vercel.app
 
 databases:
   - name: task-management-db
