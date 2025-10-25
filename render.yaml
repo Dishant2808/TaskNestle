@@ -1,0 +1,30 @@
+services:
+  - type: web
+    name: task-management-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        fromDatabase:
+          name: task-management-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: admin@tasknestle.com
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: EMAIL_USER
+        value: your-email@gmail.com
+      - key: EMAIL_PASS
+        value: your-app-password
+      - key: FRONTEND_URL
+        value: https://your-frontend-url.onrender.com
+
+databases:
+  - name: task-management-db
+    plan: free
