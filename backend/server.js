@@ -164,13 +164,27 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
+    console.log(`Starting server on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`MongoDB URI: ${process.env.MONGO_URI ? 'Set' : 'Not set'}`);
+    
     await connectDB();
     
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`Health check: http://localhost:${PORT}/health`);
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`✅ Server running on port ${PORT}`);
+      console.log(`✅ Server bound to 0.0.0.0:${PORT}`);
+      console.log(`✅ Health check: http://0.0.0.0:${PORT}/health`);
     });
+
+    // Handle server errors
+    server.on('error', (error) => {
+      console.error('Server error:', error);
+      if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use`);
+      }
+      process.exit(1);
+    });
+
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);
