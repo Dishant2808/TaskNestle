@@ -184,16 +184,63 @@ const connectDB = async () => {
   }
 };
 
+// Auto-create admin user if it doesn't exist
+const ensureAdminExists = async () => {
+  try {
+    const User = require('./models/User');
+    
+    // Check if admin already exists
+    const existingAdmin = await User.findOne({ role: 'admin' });
+    if (existingAdmin) {
+      console.log('✅ Admin user already exists:', existingAdmin.email);
+      return;
+    }
+
+    // Get admin credentials from environment variables
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@gmail.com';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
+
+    // Create admin user
+    const admin = new User({
+      name: 'System Administrator',
+      email: adminEmail,
+      password: adminPassword,
+      role: 'admin',
+      isEmailVerified: true
+    });
+
+    await admin.save();
+    console.log('✅ Admin user created successfully!');
+    console.log(`📧 Email: ${adminEmail}`);
+    console.log(`🔑 Password: ${adminPassword}`);
+    console.log('⚠️  Please change the password after first login.');
+
+  } catch (error) {
+    console.error('❌ Error creating admin user:', error);
+  }
+};
+
 // Start server
-const PORT = process.env.PORT || 5000;
+let PORT = parseInt(process.env.PORT) || 5000;
+
+// Validate port number
+if (isNaN(PORT) || PORT < 1 || PORT > 65535) {
+  console.error(`❌ Invalid port number: ${process.env.PORT}`);
+  PORT = 5000;
+}
 
 const startServer = async () => {
   try {
-    console.log(`Starting server on port ${PORT}`);
-    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`MongoDB URI: ${process.env.MONGO_URI ? 'Set' : 'Not set'}`);
+    console.log(`🔍 Environment variables:`);
+    console.log(`   PORT: ${process.env.PORT || 'Not set'}`);
+    console.log(`   NODE_ENV: ${process.env.NODE_ENV || 'Not set'}`);
+    console.log(`   MONGO_URI: ${process.env.MONGO_URI ? 'Set' : 'Not set'}`);
+    console.log(`🚀 Starting server on port ${PORT}`);
     
     await connectDB();
+    
+    // Ensure admin user exists
+    await ensureAdminExists();
     
     const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`✅ Server running on port ${PORT}`);
