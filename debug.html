@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Task Management Debug Tool</h1>
+    
+    <div class="debug-section info">
+        <h3>🔍 Debug Information</h3>
+        <p>This tool helps debug the Task Management application.</p>
+    </div>
+
+    <div class="debug-section">
+        <h3>🌐 Backend Status</h3>
+        <button onclick="checkBackend()">Check Backend</button>
+        <div id="backend-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>🔑 Authentication Test</h3>
+        <button onclick="testAuth()">Test Authentication</button>
+        <div id="auth-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>📊 API Endpoints Test</h3>
+        <button onclick="testEndpoints()">Test API Endpoints</button>
+        <div id="api-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>🧹 Clear Data</h3>
+        <button onclick="clearData()">Clear localStorage</button>
+        <div id="clear-status"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        
+        async function checkBackend() {
+            const statusDiv = document.getElementById('backend-status');
+            try {
+                const response = await fetch('http://localhost:5000/health');
+                const data = await response.json();
+                statusDiv.innerHTML = `<div class="success">✅ Backend is running<br><pre>${JSON.stringify(data, null, 2)}</pre></div>`;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Backend not responding<br><pre>${error.message}</pre></div>`;
+            }
+        }
+
+        async function testAuth() {
+            const statusDiv = document.getElementById('auth-status');
+            try {
+                // Test registration
+                const registerResponse = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'Debug User',
+                        email: 'debug@example.com',
+                        password: 'Password123'
+                    })
+                });
+                
+                const registerData = await registerResponse.json();
+                
+                if (registerData.success) {
+                    localStorage.setItem('token', registerData.data.token);
+                    statusDiv.innerHTML = `<div class="success">✅ Registration successful<br><pre>${JSON.stringify(registerData, null, 2)}</pre></div>`;
+                } else {
+                    statusDiv.innerHTML = `<div class="error">❌ Registration failed<br><pre>${JSON.stringify(registerData, null, 2)}</pre></div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Auth test failed<br><pre>${error.message}</pre></div>`;
+            }
+        }
+
+        async function testEndpoints() {
+            const statusDiv = document.getElementById('api-status');
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                statusDiv.innerHTML = `<div class="error">❌ No token found. Please test authentication first.</div>`;
+                return;
+            }
+
+            try {
+                // Test projects endpoint
+                const projectsResponse = await fetch(`${API_BASE}/projects`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const projectsData = await projectsResponse.json();
+                
+                let html = `<div class="success">✅ API Endpoints Test Results:</div>`;
+                html += `<h4>Projects API:</h4><pre>${JSON.stringify(projectsData, null, 2)}</pre>`;
+                
+                statusDiv.innerHTML = html;
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ API test failed<br><pre>${error.message}</pre></div>`;
+            }
+        }
+
+        function clearData() {
+            localStorage.clear();
+            document.getElementById('clear-status').innerHTML = '<div class="success">✅ localStorage cleared</div>';
+        }
+
+        // Auto-check backend on load
+        window.onload = function() {
+            checkBackend();
+        };
+    </script>
+</body>
+</html>
